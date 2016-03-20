@@ -1,5 +1,7 @@
 # MBuild
 
+[![Build Status](https://secure.travis-ci.org/sabel83/mbuild.png?branch=master)](http://travis-ci.org/sabel83/mbuild)
+
 A utility that helps doing C++ compilation-related measurements. It detects the
 compilers available on the system and compiles the code using them. It outputs
 the results in a JSON document.
