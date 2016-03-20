@@ -1,0 +1,17 @@
+language: cpp
+os:
+  - linux
+compiler:
+  - gcc
+  - clang
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.7
+    packages:
+      - g++-4.8
+      - clang-format-3.7
+      - clang-tidy-3.7
+script:
+  - tools/travis/${TRAVIS_OS_NAME}.sh
