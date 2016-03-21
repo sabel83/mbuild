@@ -19,6 +19,8 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
+#include <boost/optional.hpp>
+
 #include <iostream>
 
 namespace
@@ -58,11 +60,22 @@ namespace
     writer_.Int64(value_);
   }
 
+  template <class Writer, class T>
+  void display(Writer& writer_,
+               const std::string& key_,
+               const boost::optional<T>& value_)
+  {
+    if (value_)
+    {
+      display(writer_, key_, *value_);
+    }
+  }
+
   template <class Writer>
   void display(Writer& writer_, const mbuild::compiler& compiler_)
   {
     display(writer_, "compiler name", compiler_.name);
-    display(writer_, "compiler version", compiler_.version);
+    display(writer_, "compiler version", version_of(compiler_));
   }
 
   template <class Writer>
@@ -84,6 +97,8 @@ namespace
     {
       display(writer_, "user_time", result_.user_time);
       display(writer_, "memory", result_.memory);
+      display(
+          writer_, "template instantiations", result_.template_instantiations);
     }
   }
 }
@@ -102,5 +117,25 @@ namespace mbuild
     writer.EndObject();
 
     return s.GetString();
+  }
+
+  std::vector<std::string>
+  compile_command(std::vector<std::string> prefix_,
+                  const measurement::parameters& parameters_,
+                  const boost::filesystem::path& tmp_,
+                  const std::vector<std::string>& extra_compiler_args_)
+  {
+    prefix_.reserve(prefix_.size() + parameters_.opt.size() +
+                    extra_compiler_args_.size() + 5);
+    prefix_.push_back(parameters_.compiler_info.binary.string());
+    prefix_.insert(
+        prefix_.end(), parameters_.opt.begin(), parameters_.opt.end());
+    prefix_.push_back("-c");
+    prefix_.push_back("-o");
+    prefix_.push_back((tmp_ / "test.o").string());
+    prefix_.push_back(parameters_.source_file.string());
+    prefix_.insert(prefix_.end(), extra_compiler_args_.begin(),
+                   extra_compiler_args_.end());
+    return prefix_;
   }
 }

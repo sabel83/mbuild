@@ -1,5 +1,5 @@
-# MBuild - compilation measurement tool
-# Copyright (C) 2016, Abel Sinkovics (abel@sinkovics.hu)
+# Metashell - Interactive C++ template metaprogramming shell
+# Copyright (C) 2014, Andras Kucsma (andras.kucsma@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,5 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-subdirs(boost protobuf)
+use_cpp11()
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+
+aux_source_directory(. SOURCES)
+add_library(protobuf STATIC ${SOURCES})
 

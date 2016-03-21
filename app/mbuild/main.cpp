@@ -19,6 +19,7 @@
 #include <mbuild/clang.hpp>
 #include <mbuild/measurement.hpp>
 #include <mbuild/logger.hpp>
+#include <mbuild/templight.hpp>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -34,9 +35,14 @@
 
 namespace
 {
-  std::set<mbuild::compiler> discover_compilers()
+  std::set<mbuild::compiler>
+  discover_compilers(const boost::filesystem::path& tmp_dir_)
   {
-    return mbuild::discover_compilers({mbuild::gcc_info, mbuild::clang_info});
+    return mbuild::discover_compilers(
+        {mbuild::gcc_info, [&tmp_dir_](const boost::filesystem::path& binary_)
+         {
+           return mbuild::clang_info(binary_, tmp_dir_);
+         }});
   }
 
   void show_compiler_info(std::ostream& out_,
@@ -58,34 +64,6 @@ namespace
          << std::endl;
   }
 
-  std::vector<std::string>
-  compile_command(std::vector<std::string> prefix_,
-                  const mbuild::measurement::parameters& parameters_,
-                  const boost::filesystem::path& tmp_,
-                  const std::vector<std::string>& extra_compiler_args_)
-  {
-    prefix_.reserve(prefix_.size() + parameters_.opt.size() +
-                    extra_compiler_args_.size() + 5);
-    prefix_.push_back(parameters_.compiler_info.binary.string());
-    prefix_.insert(
-        prefix_.end(), parameters_.opt.begin(), parameters_.opt.end());
-    prefix_.push_back("-c");
-    prefix_.push_back("-o");
-    prefix_.push_back((tmp_ / "test.o").string());
-    prefix_.push_back(parameters_.source_file.string());
-    prefix_.insert(prefix_.end(), extra_compiler_args_.begin(),
-                   extra_compiler_args_.end());
-    return prefix_;
-  }
-
-  std::vector<std::string>
-  compile_command(const mbuild::measurement::parameters& parameters_,
-                  const boost::filesystem::path& tmp_,
-                  const std::vector<std::string>& extra_compiler_args_)
-  {
-    return compile_command({}, parameters_, tmp_, extra_compiler_args_);
-  }
-
   mbuild::measurement::result
   measure(const mbuild::measurement::parameters& parameters_,
           const boost::filesystem::path& time_,
@@ -99,13 +77,14 @@ namespace
     mbuild::measurement::result result;
 
     const auto normal_build = just::process::run(
-        compile_command(parameters_, tmp_, extra_compiler_args_), "");
+        mbuild::compile_command(parameters_, tmp_, extra_compiler_args_), "");
     result.compiles = normal_build.exit_code() == 0;
     result.standard_output = normal_build.standard_output();
     result.standard_error = normal_build.standard_error();
 
     result.user_time = 0;
     result.memory = 0;
+    result.template_instantiations = boost::none;
 
     if (result.compiles)
     {
@@ -113,8 +92,8 @@ namespace
       for (int i = 0; i < 5; ++i)
       {
         const auto time = just::process::run(
-            compile_command({time_.string(), "--format=%U %M"}, parameters_,
-                            tmp_, extra_compiler_args_),
+            mbuild::compile_command({time_.string(), "--format=%U %M"},
+                                    parameters_, tmp_, extra_compiler_args_),
             "");
         double user = 0;
         decltype(result.memory) mem = 0;
@@ -133,6 +112,8 @@ namespace
       {
         result.user_time /= measure_count;
       }
+      result.template_instantiations = mbuild::template_instantiations(
+          parameters_, tmp_, extra_compiler_args_);
     }
 
     return result;
@@ -179,7 +160,8 @@ int main(int argc_, char* argv_[])
     }
     else if (vm.count("compilers"))
     {
-      show_compiler_info(std::cout, discover_compilers());
+      show_compiler_info(
+          std::cout, discover_compilers(just::temp::directory().path()));
     }
     else if (vm.count("time_command"))
     {
@@ -191,7 +173,8 @@ int main(int argc_, char* argv_[])
     }
     else
     {
-      const auto compilers = discover_compilers();
+      just::temp::directory tmp;
+      const auto compilers = discover_compilers(tmp.path());
       if (compilers.empty())
       {
         throw std::runtime_error("No compilers were found.");
@@ -199,8 +182,6 @@ int main(int argc_, char* argv_[])
       else
       {
         const auto time = mbuild::find_time_command();
-
-        just::temp::directory tmp;
 
         mbuild::logger log(vm.count("verbose") ? &std::cerr : nullptr);
 

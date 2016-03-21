@@ -21,8 +21,11 @@
 #include <mbuild/optimisation.hpp>
 
 #include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
 
 #include <iosfwd>
+#include <string>
+#include <vector>
 
 namespace mbuild
 {
@@ -43,11 +46,26 @@ namespace mbuild
 
       double user_time;
       long memory;
+      boost::optional<long int> template_instantiations;
     };
   };
 
   std::string to_json(const measurement::parameters& parameters_,
                       const measurement::result& result_);
+
+  std::vector<std::string>
+  compile_command(std::vector<std::string> prefix_,
+                  const measurement::parameters& parameters_,
+                  const boost::filesystem::path& tmp_,
+                  const std::vector<std::string>& extra_compiler_args_);
+
+  inline std::vector<std::string>
+  compile_command(const measurement::parameters& parameters_,
+                  const boost::filesystem::path& tmp_,
+                  const std::vector<std::string>& extra_compiler_args_)
+  {
+    return compile_command({}, parameters_, tmp_, extra_compiler_args_);
+  }
 }
 
 #endif

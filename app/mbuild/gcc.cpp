@@ -30,6 +30,7 @@ namespace mbuild
       info.optimisations = {optimisation({}), optimisation({"-O1"}),
                             optimisation({"-O2"}), optimisation({"-O3"}),
                             optimisation({"-Os"})};
+      info.has_templight = false;
 
       return info;
     }

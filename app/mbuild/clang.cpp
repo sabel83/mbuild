@@ -17,11 +17,40 @@
 #include <mbuild/gcc.hpp>
 #include <mbuild/clang_or_gcc_version.hpp>
 
+#include <just/process.hpp>
+
+#include <boost/filesystem.hpp>
+
+#include <vector>
+#include <fstream>
+
+namespace
+{
+  bool has_templight(const boost::filesystem::path& clang_,
+                     const boost::filesystem::path& tmp_dir_)
+  {
+    const boost::filesystem::path src_file = tmp_dir_ / "test.cpp";
+
+    {
+      std::ofstream f(src_file.c_str());
+      f << "template <class T> struct t {}; t<int> x;\n";
+    }
+
+    just::process::run(std::vector<std::string>{clang_.string(), "-Xtemplight",
+                                                "-profiler", "-c", "test.cpp"},
+                       "", tmp_dir_.string());
+
+    return exists(tmp_dir_ / "test.o.trace.pbf");
+  }
+}
+
 namespace mbuild
 {
-  boost::optional<compiler> clang_info(const boost::filesystem::path& binary_)
+  boost::optional<compiler> clang_info(const boost::filesystem::path& binary_,
+                                       const boost::filesystem::path& tmp_dir_)
   {
-    if (const auto ver = clang_or_gcc_version(binary_, "clang", {"clang"}))
+    if (const auto ver =
+            clang_or_gcc_version(binary_, "clang", {"clang", "templight"}))
     {
       compiler info;
       info.name = "clang";
@@ -30,6 +59,7 @@ namespace mbuild
       info.optimisations = {optimisation({}), optimisation({"-O1"}),
                             optimisation({"-O2"}), optimisation({"-O3"}),
                             optimisation({"-Os"})};
+      info.has_templight = has_templight(binary_, tmp_dir_);
 
       return info;
     }

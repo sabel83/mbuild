@@ -23,6 +23,7 @@ target_link_libraries(mbuild
   boost_system
   boost_filesystem
   boost_program_options
+  protobuf
 )
 
 enable_warnings()
@@ -35,3 +36,7 @@ include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/just_temp/include")
 
 # RapidJSON
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/rapidjson/include")
+
+# Protobuf
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/protobuf/include")
+

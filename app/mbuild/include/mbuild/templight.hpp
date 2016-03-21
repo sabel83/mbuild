@@ -1,3 +1,6 @@
+#ifndef MBUILD_TEMPLIGHT_HPP
+#define MBUILD_TEMPLIGHT_HPP
+
 // MBuild - compilation measurement tool
 // Copyright (C) 2016, Abel Sinkovics (abel@sinkovics.hu)
 //
@@ -14,28 +17,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <mbuild/compiler.hpp>
+#include <mbuild/measurement.hpp>
+
+#include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
+
+#include <vector>
+#include <string>
 
 namespace mbuild
 {
-  std::string display_name(const compiler& compiler_)
-  {
-    return compiler_.name + " " + version_of(compiler_);
-  }
-
-  std::string version_of(const compiler& compiler_)
-  {
-    return compiler_.has_templight ? compiler_.version + " with Templight" :
-                                     compiler_.version;
-  }
-
-  bool operator<(const compiler& a_, const compiler& b_)
-  {
-    return display_name(a_) < display_name(b_);
-  }
-
-  bool operator==(const compiler& a_, const compiler& b_)
-  {
-    return display_name(a_) == display_name(b_);
-  }
+  boost::optional<long int>
+  template_instantiations(measurement::parameters parameters_,
+                          const boost::filesystem::path& tmp_,
+                          std::vector<std::string> extra_compiler_args_);
 }
+
+#endif

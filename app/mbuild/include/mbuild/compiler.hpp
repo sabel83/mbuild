@@ -31,6 +31,7 @@ namespace mbuild
   {
     std::string name;
     std::string version;
+    bool has_templight;
 
     // ignored in comparison
     boost::filesystem::path binary;
@@ -38,6 +39,7 @@ namespace mbuild
   };
 
   std::string display_name(const compiler& compiler_);
+  std::string version_of(const compiler& compiler_);
 
   bool operator<(const compiler& a_, const compiler& b_);
   bool operator==(const compiler& a_, const compiler& b_);

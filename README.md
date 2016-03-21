@@ -31,7 +31,7 @@ The utility detect the compilers the following way:
 
 It checks the following binaries in the above directories:
 
-* `clang*`: checks if they are Clang compilers
+* `clang*`, `templight*`: checks if they are Clang compilers
 * `gcc*`, `g++*`: check is they are GCC compilers
 
 To see which compilers were found by the utility, run `mbuil --compilers`
@@ -61,6 +61,11 @@ represents one measurement. It has the following fields:
   successful compilations only.
 * `memory`: the maximum memory consumption of the compiler (in Kb). For example:
   `12345`. Note that this is present for successful compilations only.
+* `template instantiations`: the number of template instantiations. For example:
+  `13`. Note that this is present only if the compiler has
+  [Templight](https://github.com/mikael-s-persson/templight) support. Note that
+  by installing [Metashell](https://github.com/sabel83/metashell) on your system
+  you get Templight as well (which MBuild can find and use).
 
 ## License
 

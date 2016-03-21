@@ -24,7 +24,8 @@
 
 namespace mbuild
 {
-  boost::optional<compiler> clang_info(const boost::filesystem::path& binary_);
+  boost::optional<compiler> clang_info(const boost::filesystem::path& binary_,
+                                       const boost::filesystem::path& tmp_dir_);
 }
 
 #endif
