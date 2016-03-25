@@ -40,9 +40,9 @@ namespace
     return boost::none;
   }
 
-  bool is_memoization(int instantiation_kind_)
+  bool is_template_instantiation(int instantiation_kind_)
   {
-    return instantiation_kind_ == 8;
+    return instantiation_kind_ == 0;
   }
 
   long int
@@ -60,7 +60,7 @@ namespace
       switch (reader.LastChunk)
       {
       case templight::ProtobufReader::BeginEntry:
-        if (!is_memoization(reader.LastBeginEntry.InstantiationKind))
+        if (is_template_instantiation(reader.LastBeginEntry.InstantiationKind))
         {
           ++counter;
         }
