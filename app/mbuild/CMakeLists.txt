@@ -40,3 +40,5 @@ include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/rapidjson/include")
 # Protobuf
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/protobuf/include")
 
+install(TARGETS mbuild DESTINATION bin COMPONENT mbuild)
+
