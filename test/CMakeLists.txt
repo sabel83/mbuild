@@ -1,4 +1,3 @@
-#!/bin/bash
 # MBuild - compilation measurement tool
 # Copyright (C) 2016, Abel Sinkovics (abel@sinkovics.hu)
 #
@@ -15,18 +14,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e
+subdirs(lib app)
 
-if [ ! -d cmake ]
-then
-  echo "Please run this script from the root directory of the MBuild source code"
-  exit 1
-fi
-
-find app test -type f -a '(' \
-  -name '*.hpp' -o \
-  -name '*.cpp' -o \
-  -name '*.cc' -o \
-  -name '*.c' -o \
-  -name '*.h' \
-')'

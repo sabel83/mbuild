@@ -1,4 +1,3 @@
-#!/bin/bash
 # MBuild - compilation measurement tool
 # Copyright (C) 2016, Abel Sinkovics (abel@sinkovics.hu)
 #
@@ -15,18 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set -e
+aux_source_directory(. SOURCES)
+add_library(compiler_stub STATIC ${SOURCES})
 
-if [ ! -d cmake ]
-then
-  echo "Please run this script from the root directory of the MBuild source code"
-  exit 1
-fi
+include_directories("include")
 
-find app test -type f -a '(' \
-  -name '*.hpp' -o \
-  -name '*.cpp' -o \
-  -name '*.cc' -o \
-  -name '*.c' -o \
-  -name '*.h' \
-')'
+enable_warnings()
+use_cpp11()
+
+target_link_libraries(compiler_stub
+  boost_system
+  boost_filesystem
+)
+
+# Just
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rd/just_environment/include")

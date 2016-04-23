@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-mkdir bin
+set -ex
+
+mkdir bin || true
 cd bin
 cmake ..
 make
-
+test/app/mbuild_test --mbuild app/mbuild/mbuild

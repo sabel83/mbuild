@@ -46,5 +46,5 @@ include_directories("3rd/boost/include")
 enable_testing()
 
 # Recursing
-subdirs(3rd app)
+subdirs(3rd app test)
 
