@@ -55,12 +55,20 @@ namespace
     boost::algorithm::split(out_, path, is_path_separator);
   }
 
-  std::set<std::string> dirs_to_visit_for_compilers()
+  std::set<std::string>
+  dirs_to_visit_for_compilers(bool hardcoded_dirs_enabled_)
   {
-    std::set<std::string> dirs{
-        "/bin", "/usr/bin", "/usr/local/bin",
-        (boost::filesystem::path(just::environment::get("HOME")) / "bin")
-            .string()};
+    std::set<std::string> dirs;
+
+    if (hardcoded_dirs_enabled_)
+    {
+      dirs.insert("/bin");
+      dirs.insert("/usr/bin");
+      dirs.insert("/usr/local/bin");
+      dirs.insert(
+          (boost::filesystem::path(just::environment::get("HOME")) / "bin")
+              .string());
+    }
 
     populate_with_path(dirs);
 
@@ -71,11 +79,12 @@ namespace
 namespace mbuild
 {
   std::set<compiler>
-  discover_compilers(const std::vector<compiler_query>& query_functors)
+  discover_compilers(const std::vector<compiler_query>& query_functors,
+                     bool hardcoded_dirs_enabled_)
   {
     std::set<compiler> result;
 
-    const auto dirs = dirs_to_visit_for_compilers();
+    const auto dirs = dirs_to_visit_for_compilers(hardcoded_dirs_enabled_);
     for (const auto& dir : dirs)
     {
       search_for_compilers_in(dir, query_functors, result);

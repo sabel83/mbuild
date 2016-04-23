@@ -36,13 +36,16 @@
 namespace
 {
   std::set<mbuild::compiler>
-  discover_compilers(const boost::filesystem::path& tmp_dir_)
+  discover_compilers(const boost::filesystem::path& tmp_dir_,
+                     bool hardcoded_dirs_enabled_)
   {
     return mbuild::discover_compilers(
-        {mbuild::gcc_info, [&tmp_dir_](const boost::filesystem::path& binary_)
+        {mbuild::gcc_info,
+         [&tmp_dir_](const boost::filesystem::path& binary_)
          {
            return mbuild::clang_info(binary_, tmp_dir_);
-         }});
+         }},
+        hardcoded_dirs_enabled_);
   }
 
   void show_compiler_info(std::ostream& out_,
@@ -133,7 +136,9 @@ int main(int argc_, char* argv_[])
       ("compilers", "Display the discovered compilers")
       ("time_command", "Display the path of the time command")
       ("verbose", "Display current action on stderr")
-      ("src", value(&files), "Measure compiling this file");
+      ("src", value(&files), "Measure compiling this file")
+      ("no_hardcoded_dirs", "Don't use hard-coded paths in compiler discovery")
+      ;
     // clang-format on
   }
   boost::program_options::positional_options_description positional_options;
@@ -161,7 +166,8 @@ int main(int argc_, char* argv_[])
     else if (vm.count("compilers"))
     {
       show_compiler_info(
-          std::cout, discover_compilers(just::temp::directory().path()));
+          std::cout, discover_compilers(just::temp::directory().path(),
+                                        !vm.count("no_hardcoded_dirs")));
     }
     else if (vm.count("time_command"))
     {
@@ -174,7 +180,8 @@ int main(int argc_, char* argv_[])
     else
     {
       just::temp::directory tmp;
-      const auto compilers = discover_compilers(tmp.path());
+      const auto compilers =
+          discover_compilers(tmp.path(), !vm.count("no_hardcoded_dirs"));
       if (compilers.empty())
       {
         throw std::runtime_error("No compilers were found.");
