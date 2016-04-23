@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <fstream>
+#include <cassert>
 
 namespace
 {
@@ -42,6 +43,18 @@ namespace
 
     return exists(tmp_dir_ / "test.o.trace.pbf");
   }
+
+  bool templight_of_metashell(const boost::filesystem::path& binary_)
+  {
+    return binary_.filename() == "templight_metashell";
+  }
+
+  boost::filesystem::path
+  clang_headers_of_templight_metashell(const boost::filesystem::path& binary_)
+  {
+    assert(templight_of_metashell(binary_));
+    return binary_.parent_path().parent_path() / "include/metashell/templight";
+  }
 }
 
 namespace mbuild
@@ -60,6 +73,12 @@ namespace mbuild
                             optimisation({"-O2"}), optimisation({"-O3"}),
                             optimisation({"-Os"})};
       info.has_templight = has_templight(binary_, tmp_dir_);
+
+      if (templight_of_metashell(binary_))
+      {
+        info.extra_arguments.push_back(
+            "-I" + clang_headers_of_templight_metashell(binary_).string());
+      }
 
       return info;
     }
