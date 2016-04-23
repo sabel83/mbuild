@@ -119,23 +119,29 @@ namespace mbuild
     return s.GetString();
   }
 
+  template <class V>
+  void append_to(std::vector<std::string>& a_, const V& b_)
+  {
+    a_.insert(a_.end(), b_.begin(), b_.end());
+  }
+
   std::vector<std::string>
   compile_command(std::vector<std::string> prefix_,
                   const measurement::parameters& parameters_,
                   const boost::filesystem::path& tmp_,
                   const std::vector<std::string>& extra_compiler_args_)
   {
-    prefix_.reserve(prefix_.size() + parameters_.opt.size() +
-                    extra_compiler_args_.size() + 5);
+    prefix_.reserve(prefix_.size() +
+                    parameters_.compiler_info.extra_arguments.size() +
+                    parameters_.opt.size() + extra_compiler_args_.size() + 5);
     prefix_.push_back(parameters_.compiler_info.binary.string());
-    prefix_.insert(
-        prefix_.end(), parameters_.opt.begin(), parameters_.opt.end());
+    append_to(prefix_, parameters_.compiler_info.extra_arguments);
+    append_to(prefix_, parameters_.opt);
     prefix_.push_back("-c");
     prefix_.push_back("-o");
     prefix_.push_back((tmp_ / "test.o").string());
     prefix_.push_back(parameters_.source_file.string());
-    prefix_.insert(prefix_.end(), extra_compiler_args_.begin(),
-                   extra_compiler_args_.end());
+    append_to(prefix_, extra_compiler_args_);
     return prefix_;
   }
 }

@@ -53,7 +53,12 @@ namespace
   {
     for (const auto& c : compilers_)
     {
-      out_ << display_name(c) << " (" << c.binary << ")" << std::endl;
+      out_ << display_name(c) << " (" << c.binary;
+      for (const auto& a : c.extra_arguments)
+      {
+        out_ << " \"" << a << "\"";
+      }
+      out_ << ')' << std::endl;
     }
   }
 

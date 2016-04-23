@@ -35,6 +35,7 @@ namespace mbuild
 
     // ignored in comparison
     boost::filesystem::path binary;
+    std::vector<std::string> extra_arguments;
     std::vector<optimisation> optimisations;
   };
 
