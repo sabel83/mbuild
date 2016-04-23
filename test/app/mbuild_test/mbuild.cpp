@@ -29,11 +29,6 @@ namespace
   boost::filesystem::path mbuild_binary;
   boost::filesystem::path temp_dir;
 
-  boost::filesystem::path stub(const std::string& name_)
-  {
-    return mbuild_binary.parent_path() / name_;
-  }
-
   boost::filesystem::path binary(const boost::filesystem::path& name_)
   {
 #ifdef _WIN32
