@@ -28,7 +28,8 @@ namespace mbuild
 {
   std::set<compiler>
   discover_compilers(const std::vector<compiler_query>& query_functors,
-                     bool hardcoded_dirs_enabled_);
+                     bool hardcoded_dirs_enabled_,
+                     const std::vector<boost::filesystem::path>& blacklist_);
 
   boost::filesystem::path find_time_command();
 }

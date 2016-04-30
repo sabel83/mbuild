@@ -28,18 +28,23 @@ namespace
   void search_for_compilers_in(
       const boost::filesystem::path& path_,
       const std::vector<mbuild::compiler_query>& query_functors_,
-      std::set<mbuild::compiler>& out_)
+      std::set<mbuild::compiler>& out_,
+      const std::vector<boost::filesystem::path>& blacklist_)
   {
     if (is_directory(path_))
     {
       typedef boost::filesystem::directory_iterator di;
       for (di i(path_), e; i != e; ++i)
       {
-        for (const auto& f : query_functors_)
+        if (std::find(blacklist_.begin(), blacklist_.end(), i->path()) ==
+            blacklist_.end())
         {
-          if (const auto info = f(i->path()))
+          for (const auto& f : query_functors_)
           {
-            out_.insert(*info);
+            if (const auto info = f(i->path()))
+            {
+              out_.insert(*info);
+            }
           }
         }
       }
@@ -80,14 +85,15 @@ namespace mbuild
 {
   std::set<compiler>
   discover_compilers(const std::vector<compiler_query>& query_functors,
-                     bool hardcoded_dirs_enabled_)
+                     bool hardcoded_dirs_enabled_,
+                     const std::vector<boost::filesystem::path>& blacklist_)
   {
     std::set<compiler> result;
 
     const auto dirs = dirs_to_visit_for_compilers(hardcoded_dirs_enabled_);
     for (const auto& dir : dirs)
     {
-      search_for_compilers_in(dir, query_functors, result);
+      search_for_compilers_in(dir, query_functors, result, blacklist_);
     }
 
     return result;

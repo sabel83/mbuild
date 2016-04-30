@@ -37,7 +37,8 @@ namespace
 {
   std::set<mbuild::compiler>
   discover_compilers(const boost::filesystem::path& tmp_dir_,
-                     bool hardcoded_dirs_enabled_)
+                     bool hardcoded_dirs_enabled_,
+                     const std::vector<boost::filesystem::path>& blacklist_)
   {
     return mbuild::discover_compilers(
         {mbuild::gcc_info,
@@ -45,7 +46,7 @@ namespace
          {
            return mbuild::clang_info(binary_, tmp_dir_);
          }},
-        hardcoded_dirs_enabled_);
+        hardcoded_dirs_enabled_, blacklist_);
   }
 
   void show_compiler_info(std::ostream& out_,
@@ -132,6 +133,7 @@ int main(int argc_, char* argv_[])
 {
   boost::program_options::options_description desc("options");
   std::vector<std::string> files;
+  std::vector<boost::filesystem::path> blacklist;
   {
     using boost::program_options::value;
 
@@ -142,6 +144,7 @@ int main(int argc_, char* argv_[])
       ("time_command", "Display the path of the time command")
       ("verbose", "Display current action on stderr")
       ("src", value(&files), "Measure compiling this file")
+      ("blacklist", value(&blacklist), "Blacklist a compiler (provide the path displayed by --compilers)")
       ("no_hardcoded_dirs", "Don't use hard-coded paths in compiler discovery")
       ;
     // clang-format on
@@ -171,8 +174,9 @@ int main(int argc_, char* argv_[])
     else if (vm.count("compilers"))
     {
       show_compiler_info(
-          std::cout, discover_compilers(just::temp::directory().path(),
-                                        !vm.count("no_hardcoded_dirs")));
+          std::cout,
+          discover_compilers(just::temp::directory().path(),
+                             !vm.count("no_hardcoded_dirs"), blacklist));
     }
     else if (vm.count("time_command"))
     {
@@ -185,8 +189,8 @@ int main(int argc_, char* argv_[])
     else
     {
       just::temp::directory tmp;
-      const auto compilers =
-          discover_compilers(tmp.path(), !vm.count("no_hardcoded_dirs"));
+      const auto compilers = discover_compilers(
+          tmp.path(), !vm.count("no_hardcoded_dirs"), blacklist);
       if (compilers.empty())
       {
         throw std::runtime_error("No compilers were found.");
